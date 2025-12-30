@@ -17,6 +17,7 @@
     "react-sparklines": "^1.7.0"
   },
   "devDependencies": {
+    "@netlify/plugin-nextjs": "^5.15.3",
     "@tailwindcss/postcss": "^4.1.18",
     "@types/node": "^20",
     "@types/react": "^19",
