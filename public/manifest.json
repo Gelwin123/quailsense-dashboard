@@ -1,19 +1,19 @@
 {
-  "name": "QuailSense",
+  "name": "QuailSense Dashboard",
   "short_name": "QuailSense",
-  "description": "Monitor & manage your quail farm environment",
+  "description": "Mobile Integrated IoT System for Quail Farms",
   "start_url": "/",
   "display": "standalone",
-  "background_color": "#ffffff",
+  "background_color": "#ecfdf5",
   "theme_color": "#16a34a",
   "icons": [
     {
-      "src": "/icons/icon-192x192.png",
+      "src": "/icon/quaillogo.png",
       "sizes": "192x192",
-      "type": "image/OIP(6).jng"
+      "type": "image/png"
     },
     {
-      "src": "/icons/icon-512x512.png",
+      "src": "/icon/quaillogo.png",
       "sizes": "512x512",
       "type": "image/png"
     }

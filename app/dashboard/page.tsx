@@ -44,7 +44,7 @@ export default function DashboardPage() {
         ammonia: shift(prev.ammonia, 3, 8),
       }));
       setLastUpdate(new Date());
-    }, 800);
+    }, 1000);
 
     return () => clearInterval(interval);
   }, []);
@@ -59,96 +59,164 @@ export default function DashboardPage() {
 
   const sensors = {
     temperature: { icon: Thermometer, unit: "°C", color: "#22c55e" },
-    humidity: { icon: Droplets, unit: "%", color: "#38bdf8" },
-    heat: { icon: Wind, unit: "°C", color: "#fb7185" },
-    ammonia: { icon: AlertTriangle, unit: "ppm", color: "#facc15" },
+    humidity: { icon: Droplets, unit: "%", color: "#0ea5e9" },
+    heat: { icon: Wind, unit: "°C", color: "#ef4444" },
+    ammonia: { icon: AlertTriangle, unit: "ppm", color: "#eab308" },
   };
 
-  // Latest readings
-  const tempCurrent = data.temperature[data.temperature.length - 1] || 0;
-  const humCurrent = data.humidity[data.humidity.length - 1] || 0;
-  const ammoniaCurrent = data.ammonia[data.ammonia.length - 1] || 0;
+  const tempCurrent = data.temperature.at(-1) ?? 0;
+  const humCurrent = data.humidity.at(-1) ?? 0;
+  const ammoniaCurrent = data.ammonia.at(-1) ?? 0;
 
-  // Smart insight logic based on temperature & humidity
-  let smartMessage = "✅ Environment stable. All sensor values are within safe range.";
-  let isWarning = false;
+  let message = "✅ Environment stable. All sensor values are within safe range.";
+  let warning = false;
 
   if (tempCurrent > 30 && humCurrent > 70) {
-    smartMessage =
-      "⚠ High temperature and humidity detected. Ammonia levels may rise. Ventilation recommended.";
-    isWarning = true;
+    message =
+      "⚠ High temperature & humidity detected. Ammonia may rise. Ventilation recommended.";
+    warning = true;
   } else if (ammoniaCurrent > 6) {
-    smartMessage =
-      "⚠ Ammonia level rising. Ventilation adjustment recommended.";
-    isWarning = true;
+    message = "⚠ Ammonia level rising. Ventilation adjustment recommended.";
+    warning = true;
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-green-50 to-green-100 font-sans">
+    <div className="min-h-screen bg-gradient-to-br from-emerald-50 to-lime-100 font-sans">
+      {/* Inline CSS for fonts & custom styles */}
+      <style>
+        {`
+        @import url('https://fonts.googleapis.com/css2?family=Roboto+Slab:wght@400;700&family=Inter:wght@400;600;700&display=swap');
+
+        h1, h2 {
+          font-family: 'Roboto Slab', serif;
+        }
+        body {
+          font-family: 'Inter', sans-serif;
+        }
+        .card {
+          background: linear-gradient(145deg, rgba(255,255,255,0.85), rgba(245,245,245,0.85));
+          backdrop-filter: blur(10px);
+          border-radius: 20px;
+          box-shadow: 0 8px 25px rgba(0,0,0,0.08);
+          transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+        .card:hover {
+          transform: translateY(-5px);
+          box-shadow: 0 15px 35px rgba(0,0,0,0.2);
+        }
+        .sensor-icon {
+          font-size: 1.5rem;
+          padding: 0.5rem;
+          border-radius: 50%;
+          color: white;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+        }
+        .live-badge {
+          font-weight: 700;
+          font-size: 0.65rem;
+          letter-spacing: 0.05em;
+          padding: 0.2rem 0.5rem;
+          border-radius: 9999px;
+          background: rgba(255,255,255,0.3);
+          backdrop-filter: blur(4px);
+        }
+        .smart-insight {
+          border-left: 5px solid #22c55e;
+          background: linear-gradient(135deg, rgba(255,255,255,0.9), rgba(240,240,240,0.9));
+          backdrop-filter: blur(12px);
+          padding: 1rem;
+          border-radius: 15px;
+          box-shadow: 0 8px 25px rgba(0,0,0,0.08);
+          display: flex;
+          align-items: center;
+          gap: 1rem;
+          flex-wrap: wrap;
+        }
+        .smart-insight.warning {
+          border-left-color: #ef4444;
+        }
+        .system-badge {
+          background: rgba(255,255,255,0.3);
+          padding: 0.25rem 0.75rem;
+          border-radius: 9999px;
+          font-weight: 600;
+          font-size: 0.65rem;
+          backdrop-filter: blur(6px);
+          display: flex;
+          align-items: center;
+          gap: 0.25rem;
+        }
+        @media (max-width: 768px) {
+          .grid-cols-2 {
+            grid-template-columns: repeat(1, minmax(0, 1fr));
+          }
+          h1 {
+            font-size: 1.75rem;
+          }
+          .smart-insight {
+            flex-direction: column;
+            align-items: flex-start;
+          }
+        }
+        `}
+      </style>
+
       <Navbar />
 
-      <div className="max-w-5xl mx-auto px-3 py-4">
+      <div className="max-w-6xl mx-auto px-4 py-6">
         {/* HEADER */}
-        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-6">
-          <h1 className="text-2xl font-bold text-green-800">
-            QuailSense Dashboard
+        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-7 gap-4">
+          <h1 className="text-3xl sm:text-4xl font-bold text-green-900 flex items-center gap-2">
+            🐤 QuailSense Dashboard
           </h1>
-          <div className="flex items-center gap-2 text-xs text-gray-600 mt-1 sm:mt-0">
-            <span className="flex items-center gap-1">
-              <Activity className="w-3 h-3 text-green-600 animate-pulse" />
-              4 Sensors
+
+          <div className="flex gap-3 text-xs flex-wrap">
+            <span className="system-badge animate-pulse">
+              <Activity className="w-3 h-3 text-green-600" />
+              ACTIVE
             </span>
-            <span className="flex items-center gap-1">
-              <Clock className="w-3 h-3 text-green-600" />
-              {lastUpdate ? lastUpdate.toLocaleTimeString() : "--:--"}
+            <span className="system-badge">
+              <Clock className="w-3 h-3" />
+              {lastUpdate?.toLocaleTimeString()}
             </span>
           </div>
         </div>
 
         {/* SENSOR CARDS */}
-        <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
           {(Object.keys(sensors) as SensorKey[]).map((key) => {
             const Icon = sensors[key].icon;
-            const values = data[key];
-            const current = values[values.length - 1] || 0;
-            const color = sensors[key].color;
+            const value = data[key].at(-1) ?? 0;
 
             return (
-              <div
-                key={key}
-                className="relative rounded-lg p-3 shadow-md border bg-gradient-to-br from-white to-green-50 hover:shadow-lg transition-all duration-200"
-              >
-                <div
-                  className="absolute left-0 top-0 h-full w-1 rounded-l-lg"
-                  style={{ backgroundColor: color }}
-                />
-                <div className="flex items-center justify-between">
-                  <div
-                    className="p-1 rounded"
-                    style={{ backgroundColor: `${color}30` }}
-                  >
-                    <Icon className="w-4 h-4" style={{ color }} />
-                  </div>
+              <div key={key} className="card p-5">
+                <div className="flex justify-between items-center mb-2">
+                  <Icon
+                    className="sensor-icon"
+                    style={{ backgroundColor: sensors[key].color }}
+                  />
                   <span
-                    className="text-[8px] px-1 py-0.5 rounded-full font-semibold"
-                    style={{ backgroundColor: `${color}20`, color }}
+                    className="live-badge"
+                    style={{ backgroundColor: `${sensors[key].color}30` }}
                   >
                     LIVE
                   </span>
                 </div>
-                <p className="mt-1 text-[9px] uppercase tracking-wide text-gray-500">
-                  {key}
-                </p>
-                <p className="text-lg font-bold text-gray-800 leading-tight">
-                  {current}
-                  <span className="text-[10px] ml-1 text-gray-500">
+
+                <p className="text-sm text-gray-600 uppercase">{key}</p>
+                <p className="text-2xl font-bold text-gray-800 mb-2">
+                  {value}
+                  <span className="text-xs text-gray-500 ml-1">
                     {sensors[key].unit}
                   </span>
                 </p>
-                <Sparklines data={values} height={16}>
+
+                <Sparklines data={data[key]} height={30}>
                   <SparklinesLine
-                    color={color}
-                    style={{ strokeWidth: 2, fill: "none" }}
+                    color={sensors[key].color}
+                    style={{ strokeWidth: 3, fill: `${sensors[key].color}15` }}
                   />
                 </Sparklines>
               </div>
@@ -156,33 +224,15 @@ export default function DashboardPage() {
           })}
         </div>
 
-        {/* SMART INSIGHTS */}
-        <div
-          className={`mt-3 p-3 rounded-xl shadow-md border flex items-center gap-2 ${
-            isWarning
-              ? "bg-gradient-to-r from-red-100 via-red-200 to-red-100 border-red-300"
-              : "bg-gradient-to-r from-green-100 via-green-200 to-green-100 border-green-200"
-          }`}
-        >
-          <Bell className={`w-5 h-5 ${isWarning ? "text-red-700" : "text-green-700"}`} />
+        {/* SMART INSIGHT */}
+        <div className={`smart-insight mt-6 ${warning ? "warning" : ""}`}>
+          <Bell className={`w-6 h-6 ${warning ? "text-red-600" : "text-green-600"}`} />
           <div>
-            <h2 className={`text-sm font-semibold mb-1 ${isWarning ? "text-red-800" : "text-green-800"}`}>
+            <h2 className="text-lg font-bold">
               Smart Insight
             </h2>
-            <p className="text-xs text-gray-700">{smartMessage}</p>
+            <p className="text-sm text-gray-700 mt-1">{message}</p>
           </div>
-        </div>
-
-        {/* SYSTEM EVENTS */}
-        <div className="mt-2 p-3 rounded-xl shadow-md bg-gradient-to-r from-blue-100 via-blue-200 to-blue-100 border border-blue-200">
-          <h2 className="text-sm font-semibold text-blue-800 mb-1">
-            Recent Events
-          </h2>
-          <ul className="text-xs text-gray-700 space-y-1 list-disc list-inside">
-            <li>✔ Ventilation fan adjusted</li>
-            <li>✔ Temperature stabilized</li>
-            <li>✔ All sensors normal</li>
-          </ul>
         </div>
       </div>
     </div>
